@@ -1,0 +1,49 @@
+# --- Dataset -----------------------------------------------------------------
+# BRISC2025 is ~295 MB / 15.6k files and is fetched automatically by the
+# notebook via kagglehub. Do not commit it. (data/README.md is kept.)
+data/*
+!data/README.md
+
+# --- Model checkpoints & large artifacts -------------------------------------
+*.pth
+*.pt
+*.ckpt
+*.h5
+*.onnx
+
+# --- Notebook outputs ---------------------------------------------------------
+# Checkpoints and metric CSVs written by the notebook (see README §3)
+outputs/
+notebooks/quick_run.ipynb
+notebooks/executed.ipynb
+
+# --- Course material ----------------------------------------------------------
+# Instructor-provided handout; kept locally, not redistributed.
+# Delete this line if you want the guidelines in the repo.
+docs/project_guidelines.pdf
+
+# --- Python -------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.python-version
+
+# --- Jupyter ------------------------------------------------------------------
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+
+# --- Kaggle credentials -------------------------------------------------------
+kaggle.json
+.kaggle/
+
+# --- OS / editor --------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+.idea/
+.vscode/
+*.swp
