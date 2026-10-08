@@ -1,8 +1,9 @@
 # --- Dataset -----------------------------------------------------------------
-# BRISC2025 is ~295 MB / 15.6k files and is fetched automatically by the
-# notebook via kagglehub. Do not commit it. (data/README.md is kept.)
+# BRISC2025 (CC BY 4.0) is committed under data/brisc2025/ so the repo works
+# offline. Ignore anything else dropped into data/.
 data/*
 !data/README.md
+!data/brisc2025/
 
 # --- Model checkpoints & large artifacts -------------------------------------
 *.pth

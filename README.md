@@ -41,7 +41,8 @@ classes (glioma, meningioma, no tumor, pituitary), with expert pixel masks.
 │   ├── check_data.py          # checks the dataset is complete (optional SHA-256 check)
 │   └── compare_results.py     # compares your run (outputs/) against results/
 ├── data/
-│   └── README.md              # how to get BRISC2025 (the dataset itself is not committed)
+│   ├── README.md              # dataset details, license and attribution
+│   └── brisc2025/             # BRISC2025 dataset (CC BY 4.0), included, ~295 MB
 ├── results/                   # reference metrics from the original run (CSV)
 ├── figures/                   # EDA, training curves, confusion matrices, demo outputs
 ├── outputs/                   # created when you run the notebook (checkpoints + CSVs, git-ignored)
@@ -51,14 +52,13 @@ classes (glioma, meningioma, no tumor, pituitary), with expert pixel masks.
 
 | Not in the repo | Why | How you get it |
 |---|---|---|
-| BRISC2025 dataset (~295 MB) | Distributed by its authors on Kaggle | Downloaded by the notebook automatically, or placed in `data/brisc2025/` ([data/README.md](data/README.md)) |
 | Model checkpoints (`*.pth`, ~375 MB per segmenter, ~14 MB per classifier) | Too large for git | Created by running the notebook |
 | Course handout (`docs/`) | Instructor material | – |
 
 ## 2. Quick start (5 steps)
 
 ```bash
-# 1. Clone
+# 1. Clone (~300 MB, includes the dataset)
 git clone https://github.com/MaishaMeherin/brain-tumor-segmentation-classification.git
 cd brain-tumor-segmentation-classification
 
@@ -68,8 +68,7 @@ python3.11 -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scrip
 # 3. Install dependencies
 pip install -r requirements.txt
 
-# 4. Get the data: either set up Kaggle credentials (the notebook downloads it),
-#    or put the dataset in data/brisc2025/ and check it:
+# 4. Check the bundled dataset is complete (no download or Kaggle account needed)
 python scripts/check_data.py
 
 # 5. Run the notebook top to bottom
@@ -87,7 +86,7 @@ reference run with `python scripts/compare_results.py`.
 |---|---|---|
 | Device | NVIDIA GPU, ≥ 8 GB VRAM recommended | CPU is fine |
 | Time | several hours (four 50-epoch training stages) | a few minutes |
-| Disk | ~300 MB data + ~800 MB checkpoints | ~300 MB data + ~800 MB checkpoints |
+| Disk | ~300 MB repo + ~800 MB checkpoints | ~300 MB repo + ~800 MB checkpoints |
 
 The reference run used an **NVIDIA RTX 4080 SUPER, CUDA 12.1, PyTorch 2.5.1, Python 3.10**.
 Apple Silicon (MPS) is not used. The notebook picks CUDA if available, otherwise CPU.
@@ -105,12 +104,13 @@ pip install -r requirements.txt
 
 ### Getting the data
 
-The notebook's config cell resolves the dataset in this order:
+The dataset is **included** in `data/brisc2025/`, so a normal clone has everything it
+needs. The notebook's config cell resolves the dataset in this order:
 
 1. `$BRISC_DATA_ROOT`, if set
-2. `data/brisc2025/` in this repo, if it exists
-3. Otherwise it downloads from Kaggle with `kagglehub` (cached in `~/.cache/kagglehub`).
-   This needs a Kaggle API token in `~/.kaggle/kaggle.json`.
+2. `data/brisc2025/` in this repo (the bundled copy, used by default)
+3. Otherwise it downloads from Kaggle with `kagglehub`. This is only needed if the folder
+   was deleted, and it requires a Kaggle API token in `~/.kaggle/kaggle.json`.
 
 Details and the expected folder layout are in [data/README.md](data/README.md).
 
@@ -177,7 +177,7 @@ Set `QUICK_RUN=1` to run the whole notebook end to end on a CPU. It trains every
 dependencies work. **It does not reproduce the results**, and its metrics will be low.
 
 ```bash
-python scripts/check_data.py           # data in place? (needs data/brisc2025/)
+python scripts/check_data.py           # bundled data complete?
 QUICK_RUN=1 jupyter nbconvert --to notebook --execute --ExecutePreprocessor.timeout=-1 \
   --output quick_run.ipynb notebooks/brain_tumor_segmentation_classification.ipynb
 ```
@@ -293,11 +293,15 @@ The attention gates give a small, consistent gain: on average over the three spl
 
 ## 9. Data and rules compliance
 
-**Dataset.** BRISC2025 (Fateh et al., 2025) is used as published on
-[Kaggle](https://www.kaggle.com/datasets/briscdataset/brisc2025). It is **not
-redistributed** in this repository. Each user downloads it from the official source and
-is bound by the license and terms on that page. The images are de-identified research
-data. No other data, external pretraining on medical images, or test-set information is
+**Dataset.** BRISC2025 (Fateh et al., 2025) is released on
+[Kaggle](https://www.kaggle.com/datasets/briscdataset/brisc2025) under
+**[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)**, which permits
+redistribution with attribution. An **unmodified** copy of that release, including the
+authors' README and SHA-256 manifest, is redistributed in `data/brisc2025/` for
+convenience. All credit belongs to the dataset authors: please cite their paper (see
+[Citation](#citation)) if you use the data. `python scripts/check_data.py --verify-hashes`
+confirms the copy is byte-identical to the published manifest. The images are
+de-identified research data. No other data, external pretraining on medical images, or test-set information is
 used. The only external weights are the ImageNet-pretrained MobileNetV2 from `torchvision`.
 
 **No test-set leakage.** Validation sets are carved out of the official training split
@@ -347,8 +351,8 @@ diagnosis.
 
 | Problem | Fix |
 |---|---|
-| `kagglehub` asks for credentials, or returns 401/403 | Create an API token at kaggle.com → Settings → API, save it as `~/.kaggle/kaggle.json` (`chmod 600`). Or download the dataset manually into `data/brisc2025/`. |
-| `ERROR: DATA_ROOT not found!` / `No images found` | Run `python scripts/check_data.py`. The folder must contain `classification_task/` and `segmentation_task/` directly (not nested one level deeper). |
+| `kagglehub` asks for credentials, or returns 401/403 | The notebook only uses Kaggle when `data/brisc2025/` is missing. Restore it with `git checkout -- data/`, or create an API token at kaggle.com → Settings → API and save it as `~/.kaggle/kaggle.json` (`chmod 600`). |
+| `ERROR: DATA_ROOT not found!` / `No images found` | Run `python scripts/check_data.py`. If files are missing, the clone may be incomplete: re-clone, or restore with `git checkout -- data/`. A custom copy must contain `classification_task/` and `segmentation_task/` directly (not nested one level deeper). |
 | `FileNotFoundError: unet_seg_best.pth` (or another `.pth`) | A later cell ran before the training cell that creates the checkpoint. Run all cells in order. Checkpoints are in `outputs/`. |
 | CUDA out of memory | Lower `BATCH_SIZE` in `Config` (e.g. 4) and close other GPU processes. |
 | Training is extremely slow | You are probably on CPU (the first cell prints `Device`). Install a CUDA build of PyTorch (§3), or use `QUICK_RUN=1` for a smoke test. |
